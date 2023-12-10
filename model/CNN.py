@@ -9,6 +9,8 @@ from keras import datasets
 from keras.models import Sequential
 from keras import layers
 from keras import regularizers
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 class CNN:
 
@@ -92,10 +94,33 @@ class CNN:
 
     def test(self, test_data, test_labels):
 
-        test_loss, test_accuracy = self.model.evaluate(test_data, test_labels, verbose=1)
+        predictions = self.model.predict(np.array(test_data))
 
-        print(test_loss)
-        print(test_accuracy)
+        TP = 0
+        FP = 0
+        TN = 0
+        FN = 0
+
+        print(predictions)
+
+        for i in range(len(test_data)):
+            print(predictions[i])
+            if np.argmax(predictions[i]) == 0 and test_labels[i] == 0:
+                TP += 1
+            elif np.argmax(predictions[i]) == 0 and test_labels[i] == 1:
+                FP += 1
+            elif np.argmax(predictions[i]) == 1 and test_labels[i] == 1:
+                TN += 1
+            else:
+                FN += 1
+
+        conf_matrix = [[TN, FP],
+                        [FN, TP]]
+
+        sns.heatmap(conf_matrix, annot=True)
+        plt.xlabel("Predicted")
+        plt.ylabel("Actual")
+        plt.show()
 
     def evaluate(self, org_list, forg_list, num_img, train_split, test_split):
 
@@ -134,7 +159,7 @@ class CNN:
             test_data.append(diff)
 
         self.train(test_data, test_labels)
-        # self.test(test_data, test_labels)
+        self.test(test_data, test_labels)
 
 if __name__ == '__main__':
     IMG_DIR = './data/preprocessed'
